@@ -7,16 +7,11 @@ const mongoose = require("mongoose");
 const router = require("./router");
 const errorMiddleware = require("./middleware/error-middleware");
 
-
-
 const app = express();
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static("client/build"));
-}
+app.use(cors({ credentials: true, origin: process.env.CLIENT_URL }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ credentials: true, origin: process.env.CLIENT_URL }));
 app.use("/api", router);
 app.use(errorMiddleware);
 

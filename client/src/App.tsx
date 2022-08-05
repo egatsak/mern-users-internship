@@ -47,7 +47,14 @@ const App: FC = () => {
           ? "Your account is activated!"
           : "PLEASE ACTIVATE YOUR ACCOUNT!"}
       </h1>
-      <button onClick={() => store.logout()}>Log out</button>
+      <button
+        onClick={() => {
+          setUsers([]);
+          store.logout();
+        }}
+      >
+        Log out
+      </button>
       <button onClick={getUsers}>Get users</button>
       {users.map((user) => {
         return <div key={user.email}>{user.email}</div>;

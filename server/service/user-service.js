@@ -24,7 +24,7 @@ class UserService {
 
     await mailService.sendActivationMail(
       email,
-      `${process.env.API_URL}/api/active/${activationLink}`
+      `${process.env.API_URL}/active/${activationLink}`
     );
 
     const userDto = new UserDto(user);
