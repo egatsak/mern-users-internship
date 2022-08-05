@@ -7,6 +7,10 @@ const mongoose = require("mongoose");
 const router = require("./router");
 const errorMiddleware = require("./middleware/error-middleware");
 
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());

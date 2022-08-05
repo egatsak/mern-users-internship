@@ -10,6 +10,7 @@ router.post(
   body("password").isLength({ min: 1, max: 32 }),
   userController.register
 );
+router.get('/', (req,res,next)=> {res.json('hello world!')})
 router.post("/login", userController.login);
 router.post("/logout", userController.logout);
 router.post("/delete/:link", authMiddleware, userController.deleteUser);

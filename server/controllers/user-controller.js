@@ -91,16 +91,9 @@ class UserController {
 
   async deleteManyUsers(req, res, next) {
     try {
-      //console.log(req.body);
       const users = req.body;
-      const ids = [];
-      users.forEach((item) => {
-        ids.push(item.id);
-      });
-      //console.log(ids);
       const userData = await userService.deleteManyUsers(users);
       return res.json(userData);
-      //return res.json("success");
     } catch (e) {
       next(e);
     }

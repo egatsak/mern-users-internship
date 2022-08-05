@@ -25,6 +25,7 @@ export default class Store {
   setLoading(bool: boolean) {
     this.isLoading = bool;
   }
+  
   async login(email: string, password: string) {
     try {
       const response = await AuthService.login(email, password);

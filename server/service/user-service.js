@@ -116,22 +116,6 @@ class UserService {
         id
       );
       console.log(refrToken, "refrToken");
-      /* if (refrToken) {
-        await tokenService.removeToken(refrToken);
-      } */
-      /* const token = await tokenService.removeToken(
-          refreshToken?.refreshToken
-        );
-        if (!token) {
-          console.log("TOKEN NOT FOUND!!!!!");
-        }   */
-
-      /* users.push(user.email);
-      const refreshToken = await tokenService.findTokenByUserId(user.id);
-      const token = await tokenService.removeToken(refreshToken?.refreshToken);
-      if (!token) {
-        console.log("TOKEN NOT FOUND!!!!!"); 
-      }*/
     }
     return { usersDeleted };
   }
