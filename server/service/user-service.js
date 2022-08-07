@@ -11,7 +11,7 @@ class UserService {
   async register(email, password) {
     const candidate = await User.findOne({ email });
     if (candidate) {
-      throw ApiError.BadRequest(`User with email ${email} already exists`);
+      throw ApiError.BadRequest(`User with email ${email} already exists!`);
     }
     const hashedPassword = await bcrypt.hash(password, 5);
     const activationLink = randomUUID();
@@ -52,6 +52,9 @@ class UserService {
     if (!isPassEquals) {
       throw ApiError.BadRequest(`Incorrect password!`);
     }
+    if (user.isBlocked) {
+      throw ApiError.BlockedError();
+    }
     const userDto = new UserDto(user);
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
@@ -82,7 +85,7 @@ class UserService {
   }
 
   async getAllUsers() {
-    const users = User.find();
+    const users = await User.find();
     return users;
   }
 
@@ -101,26 +104,55 @@ class UserService {
 
   async deleteManyUsers(users) {
     const usersDeleted = [];
-    for (let { id, email } of users) {
-      console.log(id, "id");
-      const user = await User.findByIdAndDelete(id);
-      console.log({ user }, "user");
-
+    for (let { _id, email } of users) {
+      console.log(_id, "id");
+      const user = await User.findByIdAndDelete(_id);
       if (!user) {
         console.log(`User ${email} wasn't found!`);
         continue;
       }
-
-      usersDeleted.push(user.email);
-      const refrToken = await tokenService.removeTokenByUserId(
-        id
-      );
-      console.log(refrToken, "refrToken");
+      const userDto = new UserDto(user);
+      usersDeleted.push(userDto);
+      await tokenService.removeTokenByUserId(_id);
     }
-    return { usersDeleted };
+    return usersDeleted;
   }
 
-  async blockUser(activationLink) {}
+  async blockManyUsers(users) {
+    console.log(users);
+    const usersBlocked = [];
+    for (let { _id, email } of users) {
+      const user = await User.findById(_id);
+      if (!user) {
+        console.log(`User ${email} wasn't found!`);
+        continue;
+      }
+      user.isBlocked = true;
+      await user.save();
+      const userDto = new UserDto(user);
+      usersBlocked.push(userDto);
+      await tokenService.removeTokenByUserId(_id);
+    }
+    const usersDb = await User.find();
+    return usersDb;
+  }
+
+  async unblockManyUsers(users) {
+    console.log(users);
+    const usersUnblocked = [];
+    for (let { _id, email } of users) {
+      const user = await User.findById(_id);
+      if (!user) {
+        console.log(`User ${email} wasn't found!`);
+        continue;
+      }
+      user.isBlocked = false;
+      await user.save();
+      const userDto = new UserDto(user);
+      usersUnblocked.push(userDto);
+    }
+    return usersUnblocked;
+  }
 }
 
 module.exports = new UserService();

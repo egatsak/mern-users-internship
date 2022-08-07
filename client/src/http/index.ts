@@ -1,8 +1,8 @@
 import axios from "axios";
 import { IAuthResponse } from "../models/response/IAuthResponse";
 
-export const API_URL = "https://mern-users-deploy.herokuapp.com/api";
-// process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+export const API_URL = //"https://mern-users-deploy.herokuapp.com/api"
+  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 const $api = axios.create({ withCredentials: true, baseURL: API_URL });
 

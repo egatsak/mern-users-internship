@@ -7,7 +7,12 @@ class UserController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return next(ApiError.BadRequest("Validation error", errors.array()));
+        return next(
+          ApiError.BadRequest(
+            "Validation error! Please enter correct email.",
+            errors.array()
+          )
+        );
       }
       const { email, password } = req.body;
       const userData = await userService.register(email, password);
@@ -81,7 +86,6 @@ class UserController {
 
   async deleteUser(req, res, next) {
     try {
-      console.log("link", req.params.link);
       const userData = await userService.deleteUser(req.params.link);
       return res.json(userData);
     } catch (e) {
@@ -92,8 +96,30 @@ class UserController {
   async deleteManyUsers(req, res, next) {
     try {
       const users = req.body;
+      //console.log(users)
       const userData = await userService.deleteManyUsers(users);
-      return res.json(userData);
+      return res.json({ message: "Users successfully deleted", userData });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async blockManyUsers(req, res, next) {
+    try {
+      const users = req.body;
+      console.log(users);
+      const userData = await userService.blockManyUsers(users);
+      return res.json({ message: "Users successfully blocked", userData });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async unblockManyUsers(req, res, next) {
+    try {
+      const users = req.body;
+      const userData = await userService.unblockManyUsers(users);
+      return res.json({ message: "Users successfully unblocked", userData });
     } catch (e) {
       next(e);
     }

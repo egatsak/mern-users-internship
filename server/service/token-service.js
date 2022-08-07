@@ -50,11 +50,6 @@ class TokenService {
     return tokenData;
   }
 
-/*   async removeToken(refreshToken) {
-    const tokenData = await tokenModel.deleteOne({ refreshToken });
-    return tokenData;
-  } */
-
   async removeTokenByUserId(id) {
     const tokenData = await tokenModel.findOneAndDelete({ id });
     return tokenData;

@@ -1,23 +1,57 @@
 import { observer } from "mobx-react-lite";
-import { FC, useContext, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState, useCallback } from "react";
+import { toast } from "react-toastify";
 import { Context } from ".";
 import LoginForm from "./components/LoginForm";
+import Navbar from "./components/Navbar";
+import UserTable from "./components/UserTable";
 import { IUser } from "./models/IUser";
 import UserService from "./services/UserService";
+
+import "react-toastify/dist/ReactToastify.css";
+import { Typography, Button } from "@mui/material";
 
 const App: FC = () => {
   const { store } = useContext(Context);
   const [users, setUsers] = useState<IUser[]>([]);
+  const notify = (text: string) => toast(text);
+  const [, updateState] = useState<string>("");
+  const forceUpdate = useCallback(() => updateState(""), []);
+
+  const getUsers = async (
+    setter: React.Dispatch<React.SetStateAction<IUser[]>>
+  ) => {
+    console.log("works");
+    try {
+      const response = await UserService.fetchUsers();
+      setter(response.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
       store.checkAuth();
     }
-  }, [store]);
+  }, [store.isAuth, store]);
 
-  if (store.isLoading) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    if (store.isAuth) {
+      //getUsers(setUsers);
+      //getUsersMobX();
+      store.getUsers().then((res) => {
+        if (res) setUsers(res);
+        forceUpdate();
+      });
+    }
+  }, [forceUpdate, store]);
+
+  useEffect(() => {
+    if (store.error) {
+      notify(store.error);
+    }
+  }, [store.error]);
 
   if (!store.isAuth) {
     return (
@@ -27,38 +61,34 @@ const App: FC = () => {
     );
   }
 
-  async function getUsers() {
-    try {
-      const response = await UserService.fetchUsers();
-      setUsers(response.data);
-    } catch (e) {
-      console.log(e);
-    }
+  if (store.isLoading) {
+    return <div>Loading...</div>;
   }
+
   return (
     <div>
-      <h1>
+      <Navbar setUsers={setUsers} />
+      <Typography variant="h5">
         {store.isAuth
-          ? `User ${store.user.email} is authorized`
+          ? `User ${store.user.email} is authorized.`
           : `Please log in!`}
-      </h1>
-      <h1>
+      </Typography>
+      <Typography variant="h5">
+        {" "}
         {store.user.isActivated
-          ? "Your account is activated!"
-          : "PLEASE ACTIVATE YOUR ACCOUNT!"}
-      </h1>
-      <button
-        onClick={() => {
-          setUsers([]);
-          store.logout();
-        }}
-      >
-        Log out
-      </button>
-      <button onClick={getUsers}>Get users</button>
-      {users.map((user) => {
-        return <div key={user.email}>{user.email}</div>;
-      })}
+          ? "Your account is activated."
+          : "Please activate your account!"}
+      </Typography>
+
+      <Button variant="contained" onClick={() => getUsers(setUsers)}>
+        update users
+      </Button>
+      <UserTable
+        users={users}
+        setUsers={setUsers}
+        getUsers={getUsers}
+        forceUpdate={forceUpdate}
+      />
     </div>
   );
 };
